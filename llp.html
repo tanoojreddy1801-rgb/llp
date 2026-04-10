@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+/* GLOBAL */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f6fb;
+  margin: 0;
+  padding: 30px 10px;
+}
+
+/* CARD */
+.box {
+  max-width: 550px;
+  margin: auto;
+  background: #fff;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* TITLE */
+.box h3 {
+  text-align: center;
+  color: #1f2a6b;
+}
+
+/* INPUT */
+input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+/* DROPDOWN */
+ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  display: none;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+li {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+li:hover {
+  background: #eef1ff;
+}
+
+/* RESULT */
+.result {
+  margin-top: 18px;
+  background: #eef1ff;
+  padding: 16px;
+  border-radius: 12px;
+  border-left: 5px solid #2d3dbf;
+}
+
+.result p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.label {
+  font-weight: 600;
+  color: #1f2a6b;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h3>LLP Compliance Check</h3>
+
+<input type="text" id="search" placeholder="Search LLP form...">
+<ul id="list"></ul>
+
+<div class="result">
+  <p><span class="label">SL No:</span> <span id="sl"></span></p>
+  <p><span class="label">Form name:</span> <span id="form"></span></p>
+  <p><span class="label">Purpose of filing the form:</span> <span id="purpose"></span></p>
+  <p><span class="label">Relevant rule and section under LLP rules and LLP act:</span> <span id="law"></span></p>
+  <p><span class="label">Due date:</span> <span id="due"></span></p>
+  <p><span class="label">Remarks:</span> <span id="remarks"></span></p>
+</div>
+
+</div>
+
+<script>
+
+let data = [];
+
+/* FETCH JSON */
+fetch('https://tanoojreddy1801-rgb.github.io/tds-tool/llp.json')
+.then(res => res.json())
+.then(json => {
+  data = json;
+});
+
+/* SAFE GET */
+function get(obj, key){
+  return obj[key] !== undefined ? obj[key] : "";
+}
+
+/* RENDER LIST */
+function renderList(arr){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  arr.forEach(item => {
+
+    const li = document.createElement("li");
+    li.textContent = get(item, "Form name") || "Unknown";
+
+    li.onclick = () => {
+
+      document.getElementById("sl").textContent =
+        get(item, "SL No");
+
+      document.getElementById("form").textContent =
+        get(item, "Form name");
+
+      document.getElementById("purpose").textContent =
+        get(item, "Purpose of filing the form");
+
+      document.getElementById("law").textContent =
+        get(item, "Relevant rule and section under LLP rules and LLP act");
+
+      document.getElementById("due").textContent =
+        get(item, "Due date");
+
+      document.getElementById("remarks").textContent =
+        get(item, "Remarks");
+
+      /* CLOSE DROPDOWN */
+      list.style.display = "none";
+
+      /* CLEAR SEARCH */
+      document.getElementById("search").value = "";
+    };
+
+    list.appendChild(li);
+  });
+}
+
+/* SHOW LIST */
+function showList(){
+  document.getElementById("list").style.display = "block";
+  renderList(data);
+}
+
+const search = document.getElementById("search");
+
+/* OPEN ON CLICK */
+search.addEventListener("focus", showList);
+search.addEventListener("click", showList);
+
+/* SEARCH FILTER */
+search.addEventListener("input", function(){
+
+  const val = this.value.toLowerCase();
+
+  const filtered = data.filter(item =>
+    JSON.stringify(item).toLowerCase().includes(val)
+  );
+
+  renderList(filtered);
+  document.getElementById("list").style.display = "block";
+
+});
+
+</script>
+
+</body>
+</html>
